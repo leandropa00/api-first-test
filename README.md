@@ -1,213 +1,447 @@
-# API First Example - FastAPI
+# Requerimientos Funcionales y No Funcionales
 
-Este proyecto es un ejemplo de desarrollo **API First** utilizando FastAPI. Demuestra cómo diseñar y desarrollar una API RESTful siguiendo el enfoque API First, donde la especificación de la API (OpenAPI/Swagger) se genera automáticamente a partir del código.
+## Análisis del Proyecto
 
-## 🚀 Características
+Este documento define los requerimientos funcionales y no funcionales del proyecto **API First Example**, una API REST desarrollada con FastAPI que gestiona usuarios e items, y genera reportes basados en estos datos.
 
-- **API First Development**: La documentación OpenAPI se genera automáticamente
-- **Validación de Datos**: Usando Pydantic para validación automática
-- **Documentación Interactiva**: Swagger UI y ReDoc incluidos
-- **Dockerizado**: Listo para ejecutar con Docker y Docker Compose
-- **Estructura Modular**: Código organizado con routers y modelos separados
+---
 
-## 📋 Requisitos Previos
+## 1. Requerimientos Funcionales
 
-- Docker y Docker Compose instalados
-- O Python 3.11+ si prefieres ejecutar sin Docker
+### 1.1. Gestión de Usuarios
 
-## 🏗️ Estructura del Proyecto
+#### RF-001: Crear Usuario
+- **Descripción**: El sistema debe permitir crear nuevos usuarios con email y nombre completo.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - El email debe ser válido y único en el sistema
+  - El nombre completo debe tener entre 1 y 100 caracteres
+  - El sistema debe asignar automáticamente un ID único y timestamps de creación
+  - Debe retornar el usuario creado con todos sus datos
 
-```
-api-first/
-├── app/
-│   ├── __init__.py
-│   ├── main.py              # Aplicación principal FastAPI
-│   ├── models.py            # Modelos Pydantic (contrato de la API)
-│   └── routers/
-│       ├── __init__.py
-│       ├── users.py         # Endpoints de usuarios
-│       └── items.py         # Endpoints de items
-├── Dockerfile
-├── docker-compose.yml
-├── Makefile                 # Comandos útiles para Docker
-├── requirements.txt
-└── README.md
-```
+#### RF-002: Listar Usuarios
+- **Descripción**: El sistema debe permitir obtener la lista de todos los usuarios registrados.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe retornar todos los usuarios sin filtros
+  - Cada usuario debe incluir: ID, email, nombre completo, fecha de creación y última actualización
 
-## 🐳 Ejecución con Docker
+#### RF-003: Obtener Usuario por ID
+- **Descripción**: El sistema debe permitir obtener la información de un usuario específico por su ID.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe retornar error 404 si el usuario no existe
+  - Debe retornar todos los datos del usuario si existe
 
-### Opción 1: Makefile (Más fácil)
+#### RF-004: Actualizar Usuario
+- **Descripción**: El sistema debe permitir actualizar la información de un usuario existente.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe permitir actualizar email y/o nombre completo de forma parcial
+  - El nuevo email debe ser válido y único si se proporciona
+  - Debe actualizar el timestamp de última modificación
+  - Debe retornar error 404 si el usuario no existe
 
-El proyecto incluye un Makefile con comandos útiles:
+#### RF-005: Eliminar Usuario
+- **Descripción**: El sistema debe permitir eliminar un usuario del sistema.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe retornar error 404 si el usuario no existe
+  - Debe eliminar completamente el usuario del sistema
+  - Debe retornar código 204 (No Content) al eliminar exitosamente
 
-```bash
-# Ver todos los comandos disponibles
-make help
+### 1.2. Gestión de Items
 
-# Construir las imágenes
-make build
+#### RF-006: Crear Item
+- **Descripción**: El sistema debe permitir crear nuevos items asociados a un usuario.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - El item debe tener título (1-200 caracteres), descripción opcional (máx. 1000 caracteres) y precio (mayor a 0)
+  - Debe estar asociado a un usuario mediante owner_id
+  - El sistema debe asignar automáticamente un ID único y timestamps de creación
+  - Debe retornar el item creado con todos sus datos
 
-# Iniciar los contenedores
-make up
+#### RF-007: Listar Items
+- **Descripción**: El sistema debe permitir obtener la lista de todos los items con soporte de paginación.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe soportar paginación mediante parámetros skip y limit
+  - El límite por defecto debe ser 100 items
+  - Cada item debe incluir: ID, título, descripción, precio, owner_id, fecha de creación y última actualización
 
-# Construir e iniciar en un solo comando
-make up-build
+#### RF-008: Obtener Items por Usuario
+- **Descripción**: El sistema debe permitir obtener todos los items pertenecientes a un usuario específico.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe filtrar items por owner_id
+  - Debe soportar paginación mediante parámetros skip y limit
+  - Debe retornar lista vacía si el usuario no tiene items
 
-# Detener y eliminar contenedores
-make down
+#### RF-009: Obtener Item por ID
+- **Descripción**: El sistema debe permitir obtener la información de un item específico por su ID.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe retornar error 404 si el item no existe
+  - Debe retornar todos los datos del item si existe
 
-# Reiniciar los contenedores
-make restart
+#### RF-010: Actualizar Item
+- **Descripción**: El sistema debe permitir actualizar la información de un item existente.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe permitir actualizar título, descripción y/o precio de forma parcial
+  - El precio debe ser mayor a 0 si se proporciona
+  - Debe actualizar el timestamp de última modificación
+  - Debe retornar error 404 si el item no existe
 
-# Ver logs
-make logs
+#### RF-011: Eliminar Item
+- **Descripción**: El sistema debe permitir eliminar un item del sistema.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe retornar error 404 si el item no existe
+  - Debe eliminar completamente el item del sistema
+  - Debe retornar código 204 (No Content) al eliminar exitosamente
 
-# Ver logs solo del API
-make logs-api
+### 1.3. Generación de Reportes
 
-# Ver estado de los contenedores
-make ps
+#### RF-012: Reporte de Resumen de Usuarios
+- **Descripción**: El sistema debe generar un reporte con resumen de todos los usuarios y estadísticas de sus items.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir el total de usuarios
+  - Para cada usuario debe mostrar: total de items, valor total de items, precio promedio de items
+  - Debe incluir la lista completa de items de cada usuario
 
-# Abrir una shell en el contenedor
-make shell
+#### RF-013: Reporte de Resumen de Items
+- **Descripción**: El sistema debe generar un reporte con resumen de todos los items e información de sus propietarios.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir estadísticas generales: total de items, valor total, precio promedio, precio mínimo, precio máximo
+  - Cada item debe incluir información de su propietario
+  - Debe manejar items sin propietario válido
 
-# Limpiar contenedores y volúmenes
-make clean
-```
+#### RF-014: Reporte Detallado de Usuario
+- **Descripción**: El sistema debe generar un reporte detallado de un usuario específico con todos sus items.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir información completa del usuario
+  - Debe incluir todos los items del usuario
+  - Debe incluir estadísticas: total de items, valor total, precio promedio, precio mínimo, precio máximo
+  - Debe retornar error 404 si el usuario no existe
 
-### Opción 2: Docker Compose (Directo)
+#### RF-015: Reporte de Visión General del Sistema
+- **Descripción**: El sistema debe generar un reporte completo con visión general de todo el sistema.
+- **Prioridad**: Baja
+- **Criterios de Aceptación**:
+  - Debe incluir: total de usuarios, total de items, valor total, precio promedio
+  - Debe incluir top 5 usuarios por cantidad de items
+  - Debe incluir top 5 usuarios por valor total de items
+  - Debe incluir estadísticas de todos los usuarios
 
-```bash
-# Construir y ejecutar el contenedor
-docker-compose up --build
+#### RF-016: Reporte de Items por Rango de Precio
+- **Descripción**: El sistema debe permitir filtrar items por rango de precios.
+- **Prioridad**: Baja
+- **Criterios de Aceptación**:
+  - Debe permitir filtrar por precio mínimo (opcional)
+  - Debe permitir filtrar por precio máximo (opcional)
+  - Debe retornar items con información de propietario
+  - Debe incluir el total de items que cumplen el filtro
 
-# Ejecutar en segundo plano
-docker-compose up -d
+### 1.4. Funcionalidades Generales
 
-# Ver logs
-docker-compose logs -f
+#### RF-017: Health Check
+- **Descripción**: El sistema debe proveer un endpoint de health check para monitoreo.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe retornar el estado de salud de la API
+  - Debe ser accesible sin autenticación
 
-# Detener el contenedor
-docker-compose down
-```
+#### RF-018: Documentación Automática
+- **Descripción**: El sistema debe generar automáticamente documentación OpenAPI/Swagger.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe estar disponible en `/docs` (Swagger UI)
+  - Debe estar disponible en `/redoc` (ReDoc)
+  - Debe estar disponible en `/openapi.json` (OpenAPI JSON)
+  - La documentación debe estar siempre actualizada con el código
 
-### Opción 3: Docker directamente
+#### RF-019: Validación de Datos
+- **Descripción**: El sistema debe validar automáticamente todos los datos de entrada.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe validar formato de email
+  - Debe validar longitudes de strings
+  - Debe validar rangos numéricos (precio > 0)
+  - Debe retornar errores descriptivos en caso de validación fallida
 
-```bash
-# Construir la imagen
-docker build -t api-first-fastapi .
+#### RF-020: Manejo de Errores
+- **Descripción**: El sistema debe manejar errores de forma consistente.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe retornar código 404 para recursos no encontrados
+  - Debe retornar código 400 para datos inválidos
+  - Debe retornar mensajes de error descriptivos
+  - Debe usar códigos de estado HTTP apropiados
 
-# Ejecutar el contenedor
-docker run -p 8000:8000 api-first-fastapi
-```
+---
 
-## 💻 Ejecución Local (sin Docker)
+## 2. Requerimientos No Funcionales
 
-```bash
-# Crear entorno virtual
-python -m venv venv
+### 2.1. Rendimiento
 
-# Activar entorno virtual
-# En Linux/Mac:
-source venv/bin/activate
-# En Windows:
-venv\Scripts\activate
+#### RNF-001: Tiempo de Respuesta
+- **Descripción**: Los endpoints deben responder en un tiempo razonable.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Endpoints de lectura (GET) deben responder en menos de 500ms
+  - Endpoints de escritura (POST, PUT, DELETE) deben responder en menos de 1s
+  - Endpoints de reportes pueden tomar hasta 2s
 
-# Instalar dependencias
-pip install -r requirements.txt
+#### RNF-002: Escalabilidad
+- **Descripción**: La arquitectura debe permitir escalar horizontalmente.
+- **Prioridad**: Baja (actualmente no implementado)
+- **Criterios de Aceptación**:
+  - La aplicación debe ser stateless
+  - Debe ser compatible con balanceadores de carga
 
-# Ejecutar la aplicación
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+### 2.2. Disponibilidad y Confiabilidad
 
-## 📚 Endpoints de la API
+#### RNF-003: Disponibilidad
+- **Descripción**: El sistema debe estar disponible para su uso.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir health check endpoint para monitoreo
+  - Debe manejar errores sin caer completamente
 
-Una vez que la aplicación esté ejecutándose, puedes acceder a:
+#### RNF-004: Persistencia de Datos
+- **Descripción**: Los datos deben persistir entre reinicios (requerimiento futuro).
+- **Prioridad**: Baja (actualmente en memoria)
+- **Criterios de Aceptación**:
+  - Actualmente los datos se pierden al reiniciar (almacenamiento en memoria)
+  - En producción se requiere base de datos persistente
 
-- **API Base**: http://localhost:8000
-- **Documentación Swagger UI**: http://localhost:8000/docs
-- **Documentación ReDoc**: http://localhost:8000/redoc
-- **Especificación OpenAPI JSON**: http://localhost:8000/openapi.json
-- **Health Check**: http://localhost:8000/health
+### 2.3. Seguridad
 
-### Endpoints de Usuarios (`/api/v1/users`)
+#### RNF-005: CORS
+- **Descripción**: El sistema debe permitir acceso desde diferentes orígenes.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Actualmente permite todos los orígenes (*)
+  - En producción debe configurarse para orígenes específicos
 
-- `POST /api/v1/users` - Crear un nuevo usuario
-- `GET /api/v1/users` - Obtener todos los usuarios
-- `GET /api/v1/users/{user_id}` - Obtener un usuario por ID
-- `PUT /api/v1/users/{user_id}` - Actualizar un usuario
-- `DELETE /api/v1/users/{user_id}` - Eliminar un usuario
+#### RNF-006: Autenticación y Autorización
+- **Descripción**: El sistema debe implementar autenticación y autorización (requerimiento futuro).
+- **Prioridad**: Baja (no implementado actualmente)
+- **Criterios de Aceptación**:
+  - Actualmente no hay autenticación
+  - En producción se requiere implementar autenticación (JWT, OAuth2, etc.)
 
-### Endpoints de Items (`/api/v1/items`)
+#### RNF-007: Validación de Entrada
+- **Descripción**: El sistema debe validar y sanitizar todas las entradas.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe usar Pydantic para validación automática
+  - Debe prevenir inyección de datos maliciosos
+  - Debe validar tipos de datos y formatos
 
-- `POST /api/v1/items?owner_id={id}` - Crear un nuevo item
-- `GET /api/v1/items` - Obtener todos los items (con paginación)
-- `GET /api/v1/items/{item_id}` - Obtener un item por ID
-- `PUT /api/v1/items/{item_id}` - Actualizar un item
-- `DELETE /api/v1/items/{item_id}` - Eliminar un item
+### 2.4. Mantenibilidad
 
-## 🧪 Ejemplos de Uso
+#### RNF-008: Código Modular
+- **Descripción**: El código debe estar organizado de forma modular.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe usar routers separados por dominio (users, items, reports)
+  - Debe separar modelos de lógica de negocio
+  - Debe seguir principios SOLID
 
-### Crear un usuario
+#### RNF-009: Documentación de Código
+- **Descripción**: El código debe estar documentado.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir docstrings en funciones y clases
+- **Estado**: Parcialmente implementado
 
-```bash
-curl -X POST "http://localhost:8000/api/v1/users" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "usuario@example.com",
-    "full_name": "Juan Pérez"
-  }'
-```
+#### RNF-010: Type Hints
+- **Descripción**: El código debe usar type hints de Python.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Todas las funciones deben tener type hints
+  - Los modelos deben usar Pydantic con validación de tipos
 
-### Obtener todos los usuarios
+### 2.5. Despliegue y Operaciones
 
-```bash
-curl "http://localhost:8000/api/v1/users"
-```
+#### RNF-011: Containerización
+- **Descripción**: El sistema debe estar containerizado con Docker.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe incluir Dockerfile
+  - Debe incluir docker-compose.yml
+  - Debe poder ejecutarse con un solo comando
 
-### Crear un item
+#### RNF-012: Health Check en Docker
+- **Descripción**: El contenedor debe incluir health check.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe configurarse health check en docker-compose.yml
+  - Debe verificar que la API esté respondiendo
 
-```bash
-curl -X POST "http://localhost:8000/api/v1/items?owner_id=1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Laptop",
-    "description": "Laptop de alta gama",
-    "price": 1299.99
-  }'
-```
+#### RNF-013: Hot Reload en Desarrollo
+- **Descripción**: El sistema debe soportar hot reload durante desarrollo.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe usar volúmenes en docker-compose para desarrollo
+  - Debe recargar automáticamente al cambiar código
 
-## 🎯 Enfoque API First
+### 2.6. Estándares y Convenciones
 
-Este proyecto demuestra el enfoque **API First** de las siguientes maneras:
+#### RNF-014: API First Approach
+- **Descripción**: El proyecto debe seguir el enfoque API First.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Los modelos Pydantic definen el contrato de la API
+  - La documentación OpenAPI se genera automáticamente
+  - La validación es automática basada en los modelos
 
-1. **Modelos Pydantic como Contrato**: Los modelos en `app/models.py` definen el contrato de la API antes de la implementación
-2. **Documentación Automática**: FastAPI genera automáticamente la especificación OpenAPI desde el código
-3. **Validación Automática**: Pydantic valida automáticamente las solicitudes y respuestas
-4. **Type Hints**: El uso de type hints permite mejor autocompletado y validación en tiempo de desarrollo
+#### RNF-015: Versionado de API
+- **Descripción**: La API debe estar versionada.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Todos los endpoints deben estar bajo `/api/v1/`
+  - Debe permitir versionado futuro sin romper compatibilidad
 
-### Ventajas del Enfoque API First
+#### RNF-016: Estándares REST
+- **Descripción**: La API debe seguir estándares REST.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe usar métodos HTTP apropiados (GET, POST, PUT, DELETE)
+  - Debe usar códigos de estado HTTP correctos
+  - Debe usar nombres de recursos en plural
+  - Debe usar estructura de URLs RESTful
 
-- ✅ La documentación siempre está actualizada
-- ✅ Los clientes pueden generar código desde la especificación OpenAPI
-- ✅ Validación automática de datos
-- ✅ Mejor experiencia de desarrollo con autocompletado
-- ✅ Contrato claro entre frontend y backend
+### 2.7. Compatibilidad
 
-## 🔧 Tecnologías Utilizadas
+#### RNF-017: Versión de Python
+- **Descripción**: El sistema debe usar Python 3.11+.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Dockerfile debe usar Python 3.11
+  - Debe ser compatible con características modernas de Python
 
-- **FastAPI**: Framework web moderno y rápido para Python
-- **Pydantic**: Validación de datos usando type hints de Python
-- **Uvicorn**: Servidor ASGI de alto rendimiento
-- **Docker**: Containerización de la aplicación
+#### RNF-018: Compatibilidad de Dependencias
+- **Descripción**: Las dependencias deben estar especificadas y ser compatibles.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe incluir requirements.txt con versiones específicas
+  - Las versiones deben ser compatibles entre sí
 
-## 📝 Notas
+### 2.8. Usabilidad
 
-- Este es un ejemplo educativo. En producción, deberías usar una base de datos real en lugar de almacenamiento en memoria
-- Los datos se pierden al reiniciar el contenedor (almacenamiento en memoria)
-- Para producción, considera agregar autenticación, logging, y manejo de errores más robusto
+#### RNF-019: Documentación Interactiva
+- **Descripción**: La API debe proveer documentación interactiva.
+- **Prioridad**: Alta
+- **Criterios de Aceptación**:
+  - Debe incluir Swagger UI para probar endpoints
+  - Debe incluir ReDoc para documentación alternativa
+  - Debe ser accesible sin configuración adicional
 
-## 📄 Licencia
+#### RNF-020: Mensajes de Error Claros
+- **Descripción**: Los mensajes de error deben ser claros y descriptivos.
+- **Prioridad**: Media
+- **Criterios de Aceptación**:
+  - Debe incluir mensajes de error en español/inglés según corresponda
+  - Debe indicar qué campo causó el error
+  - Debe sugerir cómo corregir el error
 
-Este proyecto es un ejemplo educativo y está disponible para uso libre.
+---
+
+## 3. Requerimientos Técnicos Actuales
+
+### 3.1. Stack Tecnológico
+- **Framework**: FastAPI 0.104.1
+- **Servidor ASGI**: Uvicorn 0.24.0
+- **Validación**: Pydantic 2.5.0
+- **Lenguaje**: Python 3.11+
+- **Containerización**: Docker y Docker Compose
+
+### 3.2. Almacenamiento Actual
+- **Tipo**: En memoria (diccionarios Python)
+- **Persistencia**: No (datos se pierden al reiniciar)
+- **Limitación**: No escalable para producción
+
+### 3.3. Arquitectura
+- **Patrón**: API REST
+- **Enfoque**: API First
+- **Estructura**: Modular con routers separados
+- **CORS**: Habilitado para todos los orígenes
+
+---
+
+## 4. Requerimientos Futuros (No Implementados)
+
+### 4.1. Base de Datos
+- Implementar base de datos persistente (PostgreSQL, MySQL, etc.)
+- Implementar ORM (SQLAlchemy, Tortoise ORM, etc.)
+- Implementar migraciones de base de datos
+
+### 4.2. Autenticación y Autorización
+- Implementar autenticación JWT
+- Implementar roles y permisos
+- Implementar OAuth2
+
+### 4.3. Testing
+- Implementar tests unitarios
+- Implementar tests de integración
+- Implementar tests de carga
+
+### 4.4. Logging y Monitoreo
+- Implementar logging estructurado
+- Implementar métricas (Prometheus)
+- Implementar tracing distribuido
+
+### 4.5. CI/CD
+- Implementar pipeline de CI/CD
+- Implementar despliegue automático
+- Implementar tests automatizados
+
+---
+
+## 5. Priorización de Requerimientos
+
+### Prioridad Alta
+- RF-001 a RF-011: Gestión básica de usuarios e items
+- RF-017: Health check
+- RF-018: Documentación automática
+- RF-019: Validación de datos
+- RF-020: Manejo de errores
+- RNF-007: Validación de entrada
+- RNF-008: Código modular
+- RNF-010: Type hints
+- RNF-011: Containerización
+- RNF-014: API First approach
+- RNF-015: Versionado de API
+- RNF-016: Estándares REST
+
+### Prioridad Media
+- RF-012 a RF-016: Reportes
+- RNF-001: Tiempo de respuesta
+- RNF-003: Disponibilidad
+- RNF-005: CORS
+- RNF-009: Documentación de código
+- RNF-012: Health check en Docker
+- RNF-013: Hot reload
+- RNF-020: Mensajes de error claros
+
+### Prioridad Baja
+- RNF-002: Escalabilidad
+- RNF-004: Persistencia de datos
+- RNF-006: Autenticación y autorización
+- Todos los requerimientos futuros (Sección 4)
+
+---
+
+## 6. Notas Adicionales
+
+- Este documento se basa en el análisis del código actual del proyecto
+- Los requerimientos marcados como "futuros" no están implementados pero son recomendaciones para producción
+- El proyecto actual es un ejemplo educativo y no está listo para producción sin las mejoras mencionadas
+- Se recomienda revisar y actualizar este documento conforme el proyecto evolucione
 
